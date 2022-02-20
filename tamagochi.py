@@ -52,13 +52,15 @@ class Tamagochi:
 
     def on_btnLeft(self):
         print("click: LEFT")
-        self.btnAction.text = "Bathroom"
+        # self.btnAction.text = "Bathroom"
+        self.progress.current_value -= 5
         # TODO
 
 
     def on_btnRight(self):
         print("click: RIGHT")
-        self.btnAction.text = "Bedroom"
+        # self.btnAction.text = "Bedroom"
+        self.progress.current_value += 5
         # TODO
 
 
@@ -98,6 +100,11 @@ class Tamagochi:
         btnLeft = ui.Button("<", (self.btnAction.rect.x - 20 - 5, self.btnAction.rect.y), (20, 25), "", self.on_btnLeft)
         btnRight = ui.Button(">", (self.btnAction.rect.right + 5, self.btnAction.rect.y), (20, 25), "", self.on_btnRight)
         uiItems = [self.btnAction, btnLeft, btnRight]
+
+        uiItems.append(ui.Label("age: 2", (100, 100), 15))
+        uiItems.append(ui.Label("money: $55", (100, 115), 15))
+        self.progress = ui.ProgressBar((100, 150), (100, 20), self.colors["BLACK"], self.colors["GREEN"], 50, 100)
+        uiItems.append(self.progress)
 
         #Game loop
         while True:
