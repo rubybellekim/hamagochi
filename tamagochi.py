@@ -3,6 +3,10 @@ import math
 from pygame.locals import *
 import ui
 
+# 2022/03/06
+# Class : Added View
+# Question : How to change actionBtn text?
+# Todo : Sprite - next class / Main screen(new,continue,setting,exit) / UI
 
 class Tamagochi:
     def draw_game(self, surface, screenInfo, colors, res):
@@ -40,7 +44,7 @@ class Tamagochi:
 
     def load_resources(self):
         res = {}
-        res['background'] = pygame.image.load('./res/background.png')
+        res['background'] = pygame.image.load('./tutoring/hamagochi/res/background.png')
         # TODO: load other resources
         return res
 
@@ -52,16 +56,31 @@ class Tamagochi:
 
 
     def on_btnLeft(self):
-        print("click: LEFT")
         # self.btnAction.text = "Bathroom"
-        self.progress.current_value -= 5
+        # self.progress.current_value -= 5
+        # if self.currentViewIndex >= 2:
+        print("click: LEFT")
+
+        if self.currentViewIndex == 0:
+            self.currentViewIndex = len(self.switchableViews)
+            self.currentViewIndex -= 1
+        else:
+            self.currentViewIndex -= 1
+
+        self.currentView = self.switchableViews[self.currentViewIndex]
+        self.views[self.currentView].element("btn").text = self.switchableViews[self.currentViewIndex]
         # TODO
 
 
     def on_btnRight(self):
         print("click: RIGHT")
         # self.btnAction.text = "Bedroom"
-        self.progress.current_value += 5
+        # self.progress.current_value += 5
+        self.currentViewIndex += 1
+        if self.currentViewIndex >= len(self.switchableViews):
+            self.currentViewIndex = 0
+        self.currentView = self.switchableViews[self.currentViewIndex]
+        self.views[self.currentView].element("btn").text = self.switchableViews[self.currentViewIndex]
         # TODO
 
     def on_settingsBack(self):
@@ -98,21 +117,24 @@ class Tamagochi:
         self.res = self.load_resources()
 
         # create UI
-        self.btnAction = ui.Button("Kitchen", (((self.screenInfo['gameAreaWidth'] - 90) / 2),
-                                    (self.screenInfo['gameAreaHeight'] - 10 - 25)), (90, 25), "", self.on_btnAction)
+        self.btnAction = ui.Button("main", (((self.screenInfo['gameAreaWidth'] - 90) / 2),
+                                   (self.screenInfo['gameAreaHeight'] - 10 - 25)), (90, 25), "", self.on_btnAction)
 
         btnLeft = ui.Button("<", (self.btnAction.rect.x - 20 - 5, self.btnAction.rect.y), (20, 25), "", self.on_btnLeft)
         btnRight = ui.Button(">", (self.btnAction.rect.right + 5, self.btnAction.rect.y), (20, 25), "", self.on_btnRight)
         self.progress = ui.ProgressBar((30, 80), (100, 20), self.colors["BLACK"], self.colors["GREEN"], 50, 100)
+        self.character = ui.Character((100, 100), (20, 20), self.colors["RED"])
 
         viewRect = (self.screenInfo['gameAreaPadding'], self.screenInfo['gameAreaPadding'], self.screenInfo['gameAreaWidth'], self.screenInfo['gameAreaHeight'])
         self.views = {"main": ui.View(viewRect),
                       "settings": ui.View(viewRect),
                       "kitchen": ui.View(viewRect),
                       "bank": ui.View(viewRect),
-                      "...": ui.View(viewRect)}
+                      "restaurant": ui.View(viewRect)}
         self.currentView = "main"
-        # self.switchableViews = ["kitchen", "bank", "livingroom"]
+        self.switchableViews = ["main", "kitchen", "bank", "restaurant"]
+        self.currentViewIndex = 0
+
         # self.currentViewIndex = 0
         # switchableViews[currentViewIndex]
         # self.currentViewIndex += 1 // -= 1
@@ -121,19 +143,36 @@ class Tamagochi:
 
         # characterItem = ui.Label("CHAR", (0, 40), 15)
 
-        self.views["main"].addElement("1", self.btnAction)
-        self.views["main"].addElement("left", btnLeft)
-        self.views["main"].addElement("right", btnRight)
-        self.views["main"].addElement("4", ui.Label("age: 2", (30, 30), 15))
-        self.views["main"].addElement("5", ui.Label("money: $55", (30, 45), 15))
+        self.views["main"].addElement("btn", self.btnAction)
+        self.views["main"].addElement("leftBtn", btnLeft)
+        self.views["main"].addElement("rightBtn", btnRight)
+        self.views["main"].addElement("character", self.character)
+        self.views["main"].addElement("ageLabel", ui.Label("age: 2", (30, 30), 15))
+        self.views["main"].addElement("moneyLabel", ui.Label("money: $55", (30, 45), 15))
         self.views["main"].addElement("progress", self.progress)
         # self.views["main"].addElement("char", characterItem)
-        self.views["main"].addElement("testLabel", ui.Label("TEST", (0, 0), 18))
+        self.views["main"].addElement("testLabel1", ui.Label("TEST", (0, 0), 18))
         # self.views["main"].element("testLabel").text = "OK"
 
-        self.views["settings"].addElement("1", ui.Label("Settings", (40, 30), 18))
-        self.views["settings"].addElement("2", ui.Button("back", (80, 130), (50, 25), "", self.on_settingsBack))
+        self.views["settings"].addElement("settingLabel", ui.Label("Settings", (40, 30), 18))
+        self.views["settings"].addElement("backBtn", ui.Button("back", (80, 130), (50, 25), "", self.on_settingsBack))
         # self.views["settings"].addElement("char", characterItem)
+
+        self.views["kitchen"].addElement("btn", self.btnAction)
+        self.views["kitchen"].addElement("leftBtn", btnLeft)
+        self.views["kitchen"].addElement("rightBtn", btnRight)
+        self.views["kitchen"].addElement("testLabel2", ui.Label("kitchen", (0, 0), 18))
+
+        self.views["bank"].addElement("btn", self.btnAction)
+        self.views["bank"].addElement("leftBtn", btnLeft)
+        self.views["bank"].addElement("rightBtn", btnRight)
+        self.views["bank"].addElement("testLabel3", ui.Label("bank", (0, 0), 18))
+
+        self.views["restaurant"].addElement("btn", self.btnAction)
+        self.views["restaurant"].addElement("leftBtn", btnLeft)
+        self.views["restaurant"].addElement("rightBtn", btnRight)
+        self.views["restaurant"].addElement("testLabel4", ui.Label("restaurant", (0, 0), 18))
+        
 
         # self.views["main"].element("char").text = "666"
         # self.views["settings"].element("char").text = "777"

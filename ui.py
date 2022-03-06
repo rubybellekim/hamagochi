@@ -104,6 +104,25 @@ class ProgressBar(UiElement):
         print()
 
 
+class Character(UiElement):
+    def __init__(self, position, size, color):
+        UiElement.__init__(self)
+        self.size = size
+        self.color = color
+        self.setPosition(position[0], position[1])
+    
+    def setPosition(self, x, y):
+        self.position = (x, y)
+        self.rect = pygame.Rect(self.position[0], self.position[1], self.size[0], self.size[1])
+
+    def draw(self, surface):
+        pygame.draw.rect(surface, self.color, self.rect)
+
+    def click(self, event):
+        # do nothing
+        print()
+
+
 class View:
     # viewRect is tuple (x, y, width, height)
     def __init__(self, viewRect):
