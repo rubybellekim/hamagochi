@@ -1,15 +1,35 @@
 import pygame
 
-class Button:
+# every UI element should have self.position = (x, y)
+class UiElement:
+    def __init__(self):
+        self.position = (0, 0)
+        self.inView = False
+
+    def setPosition(self, x, y):
+        self.position = (x, y)
+
+    def draw(self, surface):
+        print("do nothing")
+
+    def click(self, event):
+        print("do nothing")
+
+
+class Button(UiElement):
     """Create a button, then blit the surface in the while loop"""
     def __init__(self, text, pos, size, img, callback):
-        self.x, self.y = pos
+        UiElement.__init__(self)
         self.text = text
+        self.size = size
         self.callback = callback
         # self.img = pygame.image.load('./res/background.png')
         # self.rect = pygame.Rect(self.x, self.y, self.img.get_rect().width, self.img.get_rect().height)
-        self.rect = pygame.Rect(self.x, self.y, size[0], size[1])
+        self.setPosition(pos[0], pos[1])
  
+    def setPosition(self, x, y):
+        self.position = (x, y)
+        self.rect = pygame.Rect(self.position[0], self.position[1], self.size[0], self.size[1])
 
     def draw(self, surface):
         # This creates a new object on which you can call the render method.
@@ -18,7 +38,7 @@ class Button:
         # This creates a new surface with text already drawn onto it. At the end you can just blit the text surface onto your main screen.
         textsurface = myfont.render(self.text, True, (0, 0, 0))
         text_size = textsurface.get_size()
-        text_pos = (self.x + (self.rect.width - text_size[0]) / 2, (self.y + (self.rect.height - text_size[1]) / 2))
+        text_pos = (self.position[0] + (self.rect.width - text_size[0]) / 2, (self.position[1] + (self.rect.height - text_size[1]) / 2))
 
         # surface.blit(self.img, (self.x, self.y))
         pygame.draw.rect(surface, (0, 255, 0), self.rect)
@@ -33,12 +53,15 @@ class Button:
                     self.callback()
 
 
-class Label:
+class Label(UiElement):
     def __init__(self, text, position, fontsize):
+        UiElement.__init__(self)
         self.text = text
         self.position = position
         self.fontsize = fontsize
 
+    def setPosition(self, x, y):
+        self.position = (x, y)
 
     def draw(self, surface):
         # This creates a new object on which you can call the render method.
@@ -53,14 +76,18 @@ class Label:
         print()
 
 
-class ProgressBar:
+class ProgressBar(UiElement):
     def __init__(self, position, size, color1, color2, current_value, max_value):
-        self.position = position
+        UiElement.__init__(self)
         self.size = size
         self.color1 = color1
         self.color2 = color2
         self.current_value = current_value
         self.max_value = max_value
+        self.setPosition(position[0], position[1])
+
+    def setPosition(self, x, y):
+        self.position = (x, y)
         self.rect = pygame.Rect(self.position[0], self.position[1], self.size[0], self.size[1])
 
     def draw(self, surface):
@@ -75,3 +102,30 @@ class ProgressBar:
     def click(self, event):
         # do nothing
         print()
+
+
+class View:
+    # viewRect is tuple (x, y, width, height)
+    def __init__(self, viewRect):
+        self.elements = {}
+        self.viewOffsetX = viewRect[0]
+        self.viewOffsetY = viewRect[1]
+        self.viewWidth = viewRect[2]
+        self.viewHeight = viewRect[3]
+
+    def addElement(self, id, item):
+        self.elements[id] = item
+        if item.inView == False:
+            self.elements[id].setPosition(item.position[0] + self.viewOffsetX, item.position[1] + self.viewOffsetY)
+            self.elements[id].inView = True
+
+    def element(self, id):
+        return self.elements[id]
+
+    def draw(self, surface):
+        for itemID in self.elements:
+            self.elements[itemID].draw(surface)
+
+    def click(self, event):
+        for itemID in self.elements:
+            self.elements[itemID].click(event)

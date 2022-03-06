@@ -47,6 +47,7 @@ class Tamagochi:
 
     def on_btnAction(self):
         print(f"click: ACTION: {self.btnAction.text}")
+        self.currentView = "settings"
         # TODO
 
 
@@ -63,6 +64,9 @@ class Tamagochi:
         self.progress.current_value += 5
         # TODO
 
+    def on_settingsBack(self):
+        print("click: SETTINGS: BACK")
+        self.currentView = "main"
 
     def start(self):
         #initialization
@@ -94,32 +98,66 @@ class Tamagochi:
         self.res = self.load_resources()
 
         # create UI
-        self.btnAction = ui.Button("Kitchen", (self.screenInfo['gameAreaPadding'] + ((self.screenInfo['gameAreaWidth'] - 90) / 2),
-                                    (self.screenInfo['gameAreaPadding'] + self.screenInfo['gameAreaHeight'] - 10 - 25)), (90, 25), "", self.on_btnAction)
+        self.btnAction = ui.Button("Kitchen", (((self.screenInfo['gameAreaWidth'] - 90) / 2),
+                                    (self.screenInfo['gameAreaHeight'] - 10 - 25)), (90, 25), "", self.on_btnAction)
 
         btnLeft = ui.Button("<", (self.btnAction.rect.x - 20 - 5, self.btnAction.rect.y), (20, 25), "", self.on_btnLeft)
         btnRight = ui.Button(">", (self.btnAction.rect.right + 5, self.btnAction.rect.y), (20, 25), "", self.on_btnRight)
-        uiItems = [self.btnAction, btnLeft, btnRight]
+        self.progress = ui.ProgressBar((30, 80), (100, 20), self.colors["BLACK"], self.colors["GREEN"], 50, 100)
 
-        uiItems.append(ui.Label("age: 2", (100, 100), 15))
-        uiItems.append(ui.Label("money: $55", (100, 115), 15))
-        self.progress = ui.ProgressBar((100, 150), (100, 20), self.colors["BLACK"], self.colors["GREEN"], 50, 100)
-        uiItems.append(self.progress)
+        viewRect = (self.screenInfo['gameAreaPadding'], self.screenInfo['gameAreaPadding'], self.screenInfo['gameAreaWidth'], self.screenInfo['gameAreaHeight'])
+        self.views = {"main": ui.View(viewRect),
+                      "settings": ui.View(viewRect),
+                      "kitchen": ui.View(viewRect),
+                      "bank": ui.View(viewRect),
+                      "...": ui.View(viewRect)}
+        self.currentView = "main"
+        # self.switchableViews = ["kitchen", "bank", "livingroom"]
+        # self.currentViewIndex = 0
+        # switchableViews[currentViewIndex]
+        # self.currentViewIndex += 1 // -= 1
+        # if currentViewIndex >= len(switchableViews) ---> currentViewIndex=0
+        # if currentViewIndex < 0 ---> currentViewIndex = len(switchableViews) - 1
+
+        # characterItem = ui.Label("CHAR", (0, 40), 15)
+
+        self.views["main"].addElement("1", self.btnAction)
+        self.views["main"].addElement("left", btnLeft)
+        self.views["main"].addElement("right", btnRight)
+        self.views["main"].addElement("4", ui.Label("age: 2", (30, 30), 15))
+        self.views["main"].addElement("5", ui.Label("money: $55", (30, 45), 15))
+        self.views["main"].addElement("progress", self.progress)
+        # self.views["main"].addElement("char", characterItem)
+        self.views["main"].addElement("testLabel", ui.Label("TEST", (0, 0), 18))
+        # self.views["main"].element("testLabel").text = "OK"
+
+        self.views["settings"].addElement("1", ui.Label("Settings", (40, 30), 18))
+        self.views["settings"].addElement("2", ui.Button("back", (80, 130), (50, 25), "", self.on_settingsBack))
+        # self.views["settings"].addElement("char", characterItem)
+
+        # self.views["main"].element("char").text = "666"
+        # self.views["settings"].element("char").text = "777"
 
         #Game loop
         while True:
             # update visual elements and redraw them
             self.draw_game(mainWindowSurface, self.screenInfo, self.colors, self.res)
-            for item in uiItems:
-                item.draw(mainWindowSurface)
+            # draw all elements from current view
+
+            # draw elem 1 (btnLeft.draw())
+            # draw elem 2 (btnRight.draw())
+            # draw elem 3 (label.draw())
+            # ...
+            # draw elem N (progress.draw())
+            self.views[self.currentView].draw(mainWindowSurface)
             pygame.display.update()
 
             # old_position = player_position
 
             # handle pending user/system events
             for event in pygame.event.get():
-                for item in uiItems:
-                    item.click(event)
+                # handle events for UI items
+                self.views[self.currentView].click(event)
 
                 if event.type == KEYDOWN:
                     print("KEYDOWN")
